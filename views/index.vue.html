@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Uploading images</title>
+    <meta name="description" content="An image uploader">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+      window.onload=()=>{
+        
+        const getParams = (name) => {
+          const urlParams = new URLSearchParams(window.location.search);
+          // console.log(urlParams.get(name))
+          return urlParams.get(name) || false;
+        }
+        
+        const getThumbnails = async (image = false) => {
+          if(image) {
+            return [`/img/${image}`];
+          } else {
+            return await fetch('/orderedList').then(async (response) => {return await response.json()}).then((list)=>{return list.map((img)=>{return `/img/${img}`})});
+          }
+        }
+        
+        Vue.component('image-picker', {
+          props: ['thumbnails'],
+          template:`
+            <ul v-if="thumbnails" >
+              <li v-for="thumbnail in thumbnails"><img v-bind:src="thumbnail" width="320" /></li>  
+            </ul>`
+        });
+        Vue.component('main-nav', {
+          props: ['routes'],
+          template:`
+            <ul>
+              <li v-for="route in routes"><a v-bind:href="route.url">{{route.text}}</a></li>    
+            </ul>`
+        });
+        
+        var app = new Vue({
+          el: '#app',
+          data() {return {
+            routes: [
+              {url:'/display',text:'List of images'},
+              {url:'/preview',text:'Preview of images'},
+              {url:'/list',text:'JSON list of images'},
+              {url:'/author',text:'Author a new postcard'},
+              {url:'/in-flight',text:'Eventually display postcards in-flight'},
+              {url:'/?image=honeypot.jpg',text:'Test image hook'}
+            ],
+            nav: [
+              {method:this.loadImage,text:'load all images'},
+              {method:this.loadAuthor,text:'load author info'},
+              {method:this.loadInFlight,text:'load postcards in-flight'}
+
+            ],
+            section: 'nav',
+            thumbnails: (getParams('image')) ? [`/img/${getParams('image')}`] : false,
+          }},
+          methods:{
+            async loadImage() {
+              this.section = 'nav';
+              this.thumbnails = await fetch('/orderedList').then(async (response) => {return await response.json()}).then((list)=>{return list.map((img)=>{return `/img/${img}`})})
+            },
+            loadAuthor() {
+              this.section = 'author';
+            },
+            loadInFlight() {
+              this.section = 'inFlight';
+            }
+          }
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <h1 v-for="item in nav"  v-on:click="item.method">{{item.text}}</h1>
+      <section id="nav" v-if="section=='nav'">
+        <main-nav v-bind:routes="this.routes"></main-nav>
+        <image-picker v-bind:thumbnails="this.thumbnails"></image-picker>
+      </section>
+      <section id="author" v-if="section=='author'">
+        <main-nav v-bind:routes="this.routes"></main-nav>
+        <p> author info! </p>
+      </section>
+      <section id="inFlight" v-if="section=='inFlight'">
+        <main-nav v-bind:routes="this.routes"></main-nav>
+        <p> in flight info! </p>
+      </section>
+    </div>
+  </body>
+</html>
+<!-- https://gist.github.com/JacobBennett/7b32b4914311c0ac0f28a1fdc411b9a7 -->

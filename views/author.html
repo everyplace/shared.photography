@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Uploading images</title>
+    <meta name="description" content="An image uploader">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+    
+    <!-- import the webpage's client-side javascript file -->
+    <script>
+    
+      window.onload = ()=> {
+        const run = async () => {
+
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const image = urlParams.get('image') || null;
+
+          let checked = null;
+          let listhtml = '';
+          let list =[];
+          if(!image){ 
+            let data = await fetch('/list');
+            list = await data.json();
+
+          } else {
+            list.push(image);
+            checked = "checked"; 
+          }
+          // alert(list)
+
+          list.forEach((item)=>{
+            listhtml += `
+              <input id="${item}" type="radio" name="image" value="${item}" ${checked} />
+              <label for="${item}"><img src="/img/${item}" /></label>
+            `;
+          })
+          console.log(listhtml)
+
+          document.getElementById('create').insertAdjacentHTML('beforeend',listhtml);
+
+        }
+
+        run().then((response)=>{
+          console.log(response);
+        })
+      }
+    </script>
+    
+  </head>
+  <body>
+    
+    
+    <h1>
+      Send
+    </h1>
+     <form id="create" action="/postcard" method="POST">
+       <input type="text" name="salutation" placeholder="(optional) Salutation, e.g. Dear So-and-so," />
+       <textarea rows="5" name="message" id="message" placeholder="Postcard Message"></textarea>
+       <input type="text" name="signature" placeholder="(optional) Signature, e.g. Sincerely..." />
+       
+<!--        <input type="text" name="back_image" placeholder="(optional) URL for background image" /> -->
+       <input type="text" name="name" placeholder="Full Name" /> 
+       <input type="text" name="street" placeholder="Street Address" /> 
+       <input type="text" name="street2" placeholder="(optional) 2nd address line" /> 
+       <input type="text" name="city" placeholder="City" /> 
+       <input type="text" name="state" placeholder="State" /> 
+       <input type="number" name="zipcode" placeholder="Zip Code" />
+       <input type="radio" id="send" name="send" value="true" /><label for="send">Send</label>
+       <input type="radio" id="dontsend" name="send" value="false" checked/><label for="dontsend">Don't send</label>
+       <input type="submit" value="Send the postcard" />
+    </form>
+
+  </body>
+</html>

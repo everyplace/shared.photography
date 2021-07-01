@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Uploading images</title>
+    <meta name="description" content="An image uploader">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <link rel="stylesheet" href="/style.css">
+    
+    
+   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+      window.onload=()=>{
+        
+        Vue.component('main-nav', {
+          props: ['routes'],
+          template:`
+            <ul>
+              <li v-for="route in routes"><a v-bind:href="route.url">{{route.text}}</a></li>    
+            </ul>`
+        });
+        
+        var app = new Vue({
+          el: '#app',
+          data() {return {
+            routes: [
+              // {url:'/preview',text:'Preview of images'},
+              {url:'/author',text:'Author a new postcard with an already uploaded image'},
+              {url:'/delete',text:'Delete all images'},
+              {url:'http://dashboard.directmailers.com',text:'Manage your Directmailers.com account'}
+            ],
+            section: 'nav'
+          }}
+        });
+      }
+    </script>
+    
+  </head>
+  <body>
+    
+    <!-- manual upload form, made for Jake -->
+    
+    <h1>
+      Upload a new image
+    </h1>
+    <p>
+      Remember, image dimensions need to be 1875x1350.
+    </p>
+    
+     <form id="imageUploader" action="/upload" method="post" enctype="multipart/form-data">
+       <input type="file" name="image" id="image" />
+       <input type="submit" />
+    </form>
+
+    
+    <div id="app">
+      <section id="nav" v-if="section=='nav'">
+        <main-nav v-bind:routes="this.routes"></main-nav>
+      </section>
+    </div>
+  </body>
+</html>
